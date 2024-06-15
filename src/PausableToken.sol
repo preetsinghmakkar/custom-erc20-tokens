@@ -3,19 +3,22 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- *    @title Mintable ERC20 Token
- *    @notice A token that can be minted by the owner or authorized users
- *    @dev Uses OpenZeppelin's ERC20 and Ownable for standard functionalities
+ *    @title Pausable ERC20 Token
+ *    @notice A token that can be paused by the owner in an emergency period
+ *    @dev Uses OpenZeppelin's ERC20, Ownable and Pausable for standard functionalities
  */
-contract MintableToken is ERC20, Ownable {
+
+contract PausableToken is ERC20, Pausable, Ownable {
     // Custom error for unauthorized access
     error NotAuthorized();
 
     // Event emitted on successful minting
     event Minted(address indexed minter, address indexed to, uint256 amount);
+    event Burned(address indexed burner, uint256 value);
 
     // Mapping to store authorized users
     mapping(address => bool) public authorizedUsers;
@@ -61,5 +64,46 @@ contract MintableToken is ERC20, Ownable {
         } else {
             revert NotAuthorized();
         }
+    }
+
+    /**
+     * @dev Burn holding tokens
+     * @param account which wants to burn tokens
+     * @param amount The amount of tokens to burn
+     */
+
+    function burn(address account, uint256 amount) external {
+        if (authorizedUsers[msg.sender]) {
+            _burn(account, amount);
+            emit Burned(msg.sender, amount);
+        } else {
+            revert NotAuthorized();
+        }
+    }
+
+    /**
+     * @dev Pause token transfers
+     */
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause token transfers
+     */
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    /**
+     * @dev Stopping token transfers
+     * @notice Override the _update function for pause mechanism
+     */
+    function _update(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override whenNotPaused {
+        super._update(from, to, amount);
     }
 }

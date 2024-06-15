@@ -13,9 +13,9 @@ contract TestingBurnableToken is Test {
     address public authorize1 = address(2);
     address public user = address(3);
 
-    function setUp() external {
+    function setUp() public {
         DeployTokens deployer = new DeployTokens();
-        (, burnableToken) = deployer.run();
+        (, burnableToken, ) = deployer.run();
     }
 
     function test_authorizeByOnlyOwner() public {
@@ -82,7 +82,7 @@ contract TestingBurnableToken is Test {
         vm.stopPrank();
     }
 
-    function test_burnFromTokenHolder() external {
+    function test_burnFromTokenHolder() public {
         vm.startPrank(owner);
         burnableToken.mint(owner, 10 * (10 ** 18));
         vm.stopPrank();
@@ -98,7 +98,7 @@ contract TestingBurnableToken is Test {
         assertEq(ownerHoldingAmount, 5 * (10 ** 18));
     }
 
-    function test_BurningEmit() external {
+    function test_BurningEmit() public {
         uint256 initialBalance = 10 * (10 ** 18);
         vm.prank(owner);
         burnableToken.mint(owner, initialBalance);
@@ -112,5 +112,32 @@ contract TestingBurnableToken is Test {
         vm.startPrank(owner);
         burnableToken.burn(owner, burnedAmount);
         vm.stopPrank();
+    }
+
+    function test_revokeAuthorization() public {
+        vm.prank(owner);
+        burnableToken.authorize(authorize1);
+
+        vm.prank(authorize1);
+        burnableToken.mint(authorize1, 10 * (10 ** 18));
+
+        vm.prank(owner);
+        burnableToken.revokeAuthorization(authorize1);
+
+        vm.prank(authorize1);
+        vm.expectRevert();
+        burnableToken.mint(authorize1, 10 * (10 ** 18));
+    }
+
+    function test_onlyOwnerCanRevokeAuthorization() public {
+        vm.prank(owner);
+        burnableToken.authorize(authorize1);
+
+        vm.prank(authorize1);
+        burnableToken.mint(authorize1, 10 * (10 ** 18));
+
+        vm.prank(user);
+        vm.expectRevert();
+        burnableToken.revokeAuthorization(authorize1);
     }
 }

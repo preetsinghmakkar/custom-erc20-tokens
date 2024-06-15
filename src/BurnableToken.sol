@@ -43,6 +43,14 @@ contract BurnableToken is ERC20, Ownable {
     }
 
     /**
+     * @dev Revoke authorization of a user to mint tokens
+     * @param _address The address to revoke authorization
+     */
+    function revokeAuthorization(address _address) external onlyOwner {
+        authorizedUsers[_address] = false;
+    }
+
+    /**
      * @dev Mint new tokens
      * @param to The address to receive the minted tokens
      * @param amount The amount of tokens to mint

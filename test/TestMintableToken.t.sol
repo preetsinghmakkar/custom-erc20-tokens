@@ -12,9 +12,9 @@ contract TestingMintableToken is Test {
     address public authorize1 = address(2);
     address public user = address(3);
 
-    function setUp() external {
+    function setUp() public {
         DeployTokens deployer = new DeployTokens();
-        (mintableToken, ) = deployer.run();
+        (mintableToken, , ) = deployer.run();
     }
 
     function test_authorizeByOnlyOwner() public {
@@ -79,5 +79,32 @@ contract TestingMintableToken is Test {
         mintableToken.mint(owner, amount);
 
         vm.stopPrank();
+    }
+
+    function test_revokeAuthorization() public {
+        vm.prank(owner);
+        mintableToken.authorize(authorize1);
+
+        vm.prank(authorize1);
+        mintableToken.mint(authorize1, 10 * (10 ** 18));
+
+        vm.prank(owner);
+        mintableToken.revokeAuthorization(authorize1);
+
+        vm.prank(authorize1);
+        vm.expectRevert();
+        mintableToken.mint(authorize1, 10 * (10 ** 18));
+    }
+
+    function test_onlyOwnerCanRevokeAuthorization() public {
+        vm.prank(owner);
+        mintableToken.authorize(authorize1);
+
+        vm.prank(authorize1);
+        mintableToken.mint(authorize1, 10 * (10 ** 18));
+
+        vm.prank(user);
+        vm.expectRevert();
+        mintableToken.revokeAuthorization(authorize1);
     }
 }
