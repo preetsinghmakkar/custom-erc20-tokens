@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
 import {MintableToken} from "../src/MintableToken.sol";
-import {DeployMintableToken} from "../script/DeployMintableToken.s.sol";
+import {DeployTokens} from "../script/DeployTokens.s.sol";
 
 contract TestingMintableToken is Test {
     MintableToken public mintableToken;
@@ -13,8 +13,8 @@ contract TestingMintableToken is Test {
     address public user = address(3);
 
     function setUp() external {
-        DeployMintableToken deployer = new DeployMintableToken();
-        mintableToken = deployer.run();
+        DeployTokens deployer = new DeployTokens();
+        (mintableToken, ) = deployer.run();
     }
 
     function test_authorizeByOnlyOwner() public {
