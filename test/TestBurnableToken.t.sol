@@ -15,7 +15,7 @@ contract TestingBurnableToken is Test {
 
     function setUp() public {
         DeployTokens deployer = new DeployTokens();
-        (, burnableToken, ) = deployer.run();
+        (, burnableToken, , , ) = deployer.run();
     }
 
     function test_authorizeByOnlyOwner() public {

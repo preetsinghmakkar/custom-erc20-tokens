@@ -14,7 +14,7 @@ contract TestingMintableToken is Test {
 
     function setUp() public {
         DeployTokens deployer = new DeployTokens();
-        (mintableToken, , ) = deployer.run();
+        (mintableToken, , , , ) = deployer.run();
     }
 
     function test_authorizeByOnlyOwner() public {
